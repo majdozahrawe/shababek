@@ -7,6 +7,7 @@ import 'package:shababeek/data/models/user_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_constants.dart';
+import '../models/change_password_model.dart';
 import '../models/user_model.dart';
 import 'api_response_handler.dart';
 import 'api_result.dart';
@@ -30,16 +31,23 @@ class ChangePasswordAPI {
         headers: headers,
         body: msg
     );
-    UserResponse userResponse;
+    PasswordResponse passwordResponse;
     var jsonResponse = jsonDecode(response.body);
 
+
     if (response.statusCode == 200) {
-      userResponse = UserResponse.fromJson(jsonResponse);
+
+      passwordResponse = PasswordResponse.fromJson(jsonResponse);
+      print("PasswordResponse : ${passwordResponse.data}");
+
       result.hasError = false;
-      result.data = userResponse.data;
+      result.data = passwordResponse.data;
+
+
     } else {
       jsonResponse = jsonDecode(response.body);
-      userResponse = UserResponse.fromJson(jsonResponse);
+      passwordResponse = PasswordResponse.fromJson(jsonResponse);
+      print("PasswordResponse in Else : ${passwordResponse.data}");
 
       result.hasError = true;
     }

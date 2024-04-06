@@ -11,6 +11,7 @@ class OtpModel {
 
   var otp;
   var id;
+  // var u_id;
 
 
   OtpModel({
@@ -18,6 +19,7 @@ class OtpModel {
     // this.phone,
     this.otp,
     this.id,
+    // this.u_id,
 
   });
 
@@ -26,7 +28,8 @@ class OtpModel {
       // otp_date: json['data']['otp_date'] ?? "",
       // phone: json['data']['phone'] ?? "",
       otp: json['otp'] ?? 0,
-      id: json['user']['_id'] ?? 0,
+      id: json['_id'] ?? 0,
+      // u_id: json['user']['_id'] ?? 0,
     );
   }
 }

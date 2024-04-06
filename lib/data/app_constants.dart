@@ -7,7 +7,7 @@ class AppConstants{
   static const int ERROR_USER_NOT_FOUND = 400;
   static String clientAccessToken ="";
 
-  static const String KEY_ACCESS_TOKEN='token';
+  static const String KEY_ACCESS_TOKEN='token_user';
   static const String favourite_worker='fav_worker';
 
 

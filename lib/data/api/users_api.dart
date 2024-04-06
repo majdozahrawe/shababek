@@ -67,6 +67,55 @@ class UsersAPI {
 
     return result;
   }
+  Future<APIResult> delete(String phone, String password) async {
+    var url = 'https://shababeek-bdbc3d3e9971.herokuapp.com/api/v1/User/Delete';
+
+    Map<String,String> headers = {'Content-Type':'application/json'};
+    final msg = jsonEncode({
+      'phone': phone,
+      'password': password
+    });
+
+    final response = await http.delete(
+        Uri.parse(url),
+        headers: headers,
+        body: msg
+    );
+
+    UserResponse userResponse;
+    var jsonResponse = jsonDecode(response.body);
+
+    print(response.body);
+
+    try {
+      if (response.statusCode == 200) {
+
+        print("Delete success");
+        print(jsonResponse['token'].toString());
+
+        userResponse = UserResponse.fromJson(jsonResponse);
+
+        result.hasError = false;
+        result.data = userResponse.data;
+      } else {
+        print("in else");
+        print(jsonResponse['message']);
+
+        jsonResponse = jsonDecode(response.body);
+        userResponse = UserResponse.fromJson(jsonResponse);
+        // User user = userResponse.data;
+        // MetaData responseMeta = userResponse.metaData;
+
+        result.hasError = true;
+        result.failure = Failure(400, jsonResponse['message']);
+      }
+
+    } catch (ex) {
+      result = APIResponseErrorHandler.parseError(ex);
+    }
+
+    return result;
+  }
 
   Future<APIResult> register(String firstName,String lastName,String phone,String password) async {
     var url = 'https://shababeek-bdbc3d3e9971.herokuapp.com/api/v1/User/Signup';

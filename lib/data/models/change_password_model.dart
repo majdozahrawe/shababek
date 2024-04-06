@@ -1,15 +1,30 @@
-class ChangePassword {
+class ChangePasswordModel {
   String id,newPassword;
 
-  ChangePassword({ required this.id , required this.newPassword,
+  ChangePasswordModel({ required this.id , required this.newPassword,
 
   });
 
-  factory ChangePassword.fromJson(Map<String,dynamic> json){
-    ChangePassword c = ChangePassword(newPassword: "",id: "",);
-    c.id = json['_id'].toString();
+  factory ChangePasswordModel.fromJson(Map<String,dynamic> json){
+    ChangePasswordModel c = ChangePasswordModel(newPassword: "",id: "",);
+    c.id = json['user']['_id'].toString();
     c.newPassword = json['password'].toString();
     return c;
+  }
+
+}
+
+
+class PasswordResponse {
+  late ChangePasswordModel data;
+
+  PasswordResponse();
+
+  factory PasswordResponse.fromJson(Map<String, dynamic> json) {
+    PasswordResponse userResponse = PasswordResponse();
+    if (json['data'] != null) userResponse.data = ChangePasswordModel.fromJson(json['data']);
+
+    return userResponse;
   }
 
 }

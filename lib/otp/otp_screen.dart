@@ -115,16 +115,7 @@ class _OtpPageState extends State<OtpPage> {
               child: Stack(
                 children: [
                   // Close icon in the top right corner
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: IconButton(
-                      icon: Icon(Icons.close), // You can customize the icon
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
+
                   Container(
                     height: 390,
                     child: Column(

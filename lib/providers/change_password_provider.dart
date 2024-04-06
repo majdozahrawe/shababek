@@ -11,7 +11,7 @@ enum ChangePasswordState { initial, loading, loaded, error }
 
 class ChangePasswordProvider with ChangeNotifier {
   ChangePasswordState state = ChangePasswordState.initial;
-  late ChangePassword changePassword;
+  late ChangePasswordModel changePassword;
   late APIResult apiResult;
   late String errorMessage;
 

@@ -33,7 +33,7 @@ class _ReEnterPhoneScreenState extends State<ReEnterPhoneScreen> {
 
   late String messageFromApi;
 
-  static final GlobalKey<FormState> _regKey = GlobalKey<FormState>();
+  // static final GlobalKey<FormState> _regKey = GlobalKey<FormState>();
   bool isLoading = false;
   bool isFormSubmitted = false; // Add this line
 
@@ -58,16 +58,7 @@ class _ReEnterPhoneScreenState extends State<ReEnterPhoneScreen> {
                 child: Stack(
                   children: [
                     // Close icon in the top right corner
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.close), // You can customize the icon
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
+
                     Container(
                       height: 390,
                       child: Column(

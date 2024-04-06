@@ -52,16 +52,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Stack(
                 children: [
                   // Close icon in the top right corner
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: IconButton(
-                      icon: Icon(Icons.close), // You can customize the icon
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
+
                   Container(
                     height: MediaQuery.of(context).size.height / 2.5,
                     child: Column(
@@ -118,6 +109,7 @@ class _SignInScreenState extends State<SignInScreen> {
   late OtpProvider otpProvider;
 
 
+
   @override
   Widget build(BuildContext context) {
 
@@ -132,31 +124,23 @@ class _SignInScreenState extends State<SignInScreen> {
     if (authProvider.state == AuthState.initial) {
       print("you in sign page nowwww");
       return _SignPage();
-    }
-    if(adsProvider.state !=AdsState.loaded){
-      print("AdsState In gen_tokeen  : ${adsProvider.state}");
-      adsProvider.loadAdsImage();
-    }
-
-    if (authProvider.state == AuthState.error) {
+    } else if (authProvider.state == AuthState.error) {
       authProvider.setState(AuthState.initial);
-
       messageFromApi = authProvider.errorMessage;
       Future.delayed(Duration.zero, () {
         showErrorCustomDialog(context, messageFromApi);
       });
       return _SignPage();
     }
-    print("AuthProvider State :");
-
-    print(authProvider.state);
-
-    if (authProvider.state == AuthState.loaded) {
+    else if (authProvider.state == AuthState.loaded) {
       print("good Login");
       return HomeScreen();
+    }
+    if(adsProvider.state !=AdsState.loaded){
+      print("AdsState In gen_tokeen  : ${adsProvider.state}");
+      adsProvider.loadAdsImage();
+    }
 
-      }
-    print("sign twwwoooo");
     return _SignPage();
   }
 
@@ -439,6 +423,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
               authProvider.login(phoneController.text.toString(),
                   passwordController.text.toString());
+
+              // authProvider.logout();
 
             }
           },

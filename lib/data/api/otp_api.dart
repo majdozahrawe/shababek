@@ -32,7 +32,7 @@ class OtpAPI {
 
       print("Formated Phone Number : {$_formatedPhone} ");
 
-      var url = 'https://shababeek-bdbc3d3e9971.herokuapp.com/api/v1/OTP/$_formatedPhone';
+      var url = 'https://shababeek-bdbc3d3e9971.herokuapp.com/api/v1/OTP/Fake/$_formatedPhone';
 
     Map<String,String> headers = {'Content-Type':'application/json'};
     final response = await http.get(Uri.parse(url),headers: headers,);
@@ -40,11 +40,15 @@ class OtpAPI {
     OtpResponse otpResponse;
     var jsonResponse = jsonDecode(response.body);
 
+
     try {
       if (response.statusCode == 200) {
         otpResponse = OtpResponse.fromJson(jsonResponse);
         result.hasError = false;
+
         result.data = otpResponse.data;
+        print("Hellooooooo 2");
+
       } else {
         jsonResponse = jsonDecode(response.body);
         otpResponse = OtpResponse.fromJson(jsonResponse);
@@ -55,7 +59,8 @@ class OtpAPI {
     } catch (ex) {
       result = APIResponseErrorHandler.parseError(ex);
     }
-    return result;
+
+      return result;
   }
 
   Future<APIResult> SendOtpToPhone(String phone) async {

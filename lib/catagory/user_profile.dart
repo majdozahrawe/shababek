@@ -13,6 +13,7 @@ import '../components/my_drawer.dart';
 import '../components/rating_stars.dart';
 import '../data/app_constants.dart';
 import '../data/models/favourite_model.dart';
+import '../delete_done_page.dart';
 import '../providers/worker_provider.dart';
 import '../sign_in/sign_in_screen.dart';
 
@@ -27,6 +28,9 @@ class _UserProfileState extends State<UserProfile> {
   bool iSfirstNameChanged = false;
   bool iSLastNameChanged = false;
   bool iSPhoneChanged = false;
+  bool isFormSubmitted = false; // Add this line
+  late String messageFromApi;
+
 
   Map<TextEditingController, String> _initialValues = {};
 
@@ -93,6 +97,70 @@ class _UserProfileState extends State<UserProfile> {
       },
     );
   }
+  Future<void> showErrorCustomDialog(BuildContext context, String message) async {
+    return showPlatformDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: ModalRoute.of(context)!.animation!, // Use the current route's animation
+            curve: Curves.ease, // Adjust the curve as needed
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(80),
+            child: Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              child: Stack(
+                children: [
+                  // Close icon in the top right corner
+
+                  Container(
+                    height: MediaQuery.of(context).size.height / 2.5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(height: 10),
+                        Center(
+                          child: Image.network("https://res.cloudinary.com/dmrb3gva0/image/upload/v1711317764/wrong_klfxqb.png",
+                            width: 100,
+                            height: 100,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Text(
+                            message,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Cairo',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DefaultButton(
+                          button_width: 200,
+                          fontSize: 18,
+                          backcolor: Color(0xFF03ADD0),
+                          text: "محاولة مرة اخرى",
+                          press: () async {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   void showToast() {
     Fluttertoast.showToast(
@@ -124,7 +192,14 @@ class _UserProfileState extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     authProvider = Provider.of<AuthProvider>(context);
+    if (authProvider.state == AuthState.error) {
+      authProvider.setState(AuthState.initial);
 
+      messageFromApi = authProvider.errorMessage;
+      Future.delayed(Duration.zero, () {
+        showErrorCustomDialog(context, messageFromApi);
+      });
+    }
     return Scaffold(
         backgroundColor: Color(0XFFF1F1F6),
         appBar: AppBar(
@@ -186,7 +261,7 @@ class _UserProfileState extends State<UserProfile> {
   void _loadToken() async {
     SharedPreferences.getInstance().then((sharedPrefValue) {
       setState(() {
-        token = sharedPrefValue.getString('token');
+        token = sharedPrefValue.getString('token_user');
       });
     });
   }
@@ -375,8 +450,180 @@ class _UserProfileState extends State<UserProfile> {
               },
             ),
           ),
+          SizedBox(height: 30),
+
+
+          GestureDetector(
+            onTap: (){
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  // Define a TextEditingController to capture the password input
+                  TextEditingController passwordController = TextEditingController();
+
+                  return AlertDialog(
+                    title: Text("تأكيد حذف الحساب",
+                      style: TextStyle(
+                        color: Colors.black38,
+                        fontSize: (18),
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Cairo',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    content: SingleChildScrollView( // Use SingleChildScrollView to ensure the dialog is scrollable if needed
+                      child: ListBody(
+                        children: <Widget>[
+                          Text("يرجى إعادة ادخال كلمة المرور لتأكيد حذف الحساب",
+                            style: TextStyle(
+                              color: Colors.black38,
+                              fontSize: (14),
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Cairo',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20), // Add some space before the password field
+                          // Password TextFormField
+                          Container(
+                            padding: EdgeInsets.fromLTRB(210, 0, 0, 0),
+                            child: FittedBox(
+                              fit: BoxFit.fitWidth,
+                              child: const Text(
+                                "كلمة المرور",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: Color(0XFF7A7A7A),
+                                  fontFamily: 'Cairo',
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          TextFormField(
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                            controller: passwordController,
+                            obscureText: true,
+                            validator: (value) {
+                              if (isFormSubmitted) {
+                                if (value!.isNotEmpty && value.length > 5) {
+                                  return null;
+                                } else if (value.isEmpty) {
+                                  return "أدخل كلمة المرور";
+                                } else if (value.length < 5 && value.isNotEmpty) {
+                                  return "يجب ان لا تقل كلمة المرور عن 5 احرف او ارقام";
+                                }
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Colors.red),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Colors.red),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Color(0xFFDADADA)), // Set the grey border color
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(color: Color(0xFFDADADA)), // Set the grey border color
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              labelStyle: const TextStyle(
+                                fontSize: 20,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFFFFFFF),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text("إلغاء",
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: (14),
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Cairo',
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text("تأكيد",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: (14),
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Cairo',
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isFormSubmitted = true;
+                          });
+                          // Use the password from the TextEditingController
+                          String password = passwordController.text;
+                          // // Perform logout actions here
+                          removeToken();
+                          authProvider.logout();
+                          print("helooooooooo in takeed");
+                          print(authProvider.user.phone.toString()+" "+ password);
+                          authProvider.delete(authProvider.user.phone.toString(), password);
+                          Navigator.pushReplacement(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2) => DeleteScreen(),
+                              transitionDuration: Duration(seconds: 1), // Set transition duration to 1 second
+                              reverseTransitionDuration: Duration(seconds: 1), // Set reverse transition duration to 1 second
+                            ),
+                          );
+                          print(authProvider.state);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.fromLTRB(205, 0, 0, 0),
+              child: FittedBox(
+                fit: BoxFit.fitWidth,
+                child: const Text(
+                  "حذف الحساب",
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    color: Colors.redAccent,
+                    fontSize: (14),
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+            ),
+          ),
         ]),
       ),
     );
   }
+}
+void removeToken() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  await preferences.remove('token_user');
+  print('Token removed from storage.');
 }

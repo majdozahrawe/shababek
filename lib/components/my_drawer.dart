@@ -322,18 +322,8 @@ class _NavDrawerState extends State<NavDrawer> {
                             child: Text("تأكيد"),
                             onPressed: () {
                               // Perform logout actions here
-                              removeToken();
-                              authProvider.logout();
-                              otpProvider.logout();
-                              Navigator.pushReplacement(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation1, animation2) => SignInScreen(),
-                                  transitionDuration: Duration(seconds: 1), // Set transition duration to 1 second
-                                  reverseTransitionDuration: Duration(seconds: 1), // Set reverse transition duration to 1 second
-                                ),
-                              );
-                              print(authProvider.state);
+                               removeToken();
+
 
 
 
@@ -352,9 +342,28 @@ class _NavDrawerState extends State<NavDrawer> {
     );
   }
 
-  void removeToken() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.remove('token');
+  Future<void> removeToken() async {
+    final  SharedPreferences preferences = await SharedPreferences.getInstance();
+    print("Remove Token auth befoooor : ${preferences.getString("token_user")}");
+
+
+    await preferences.remove('token_user');
+    
+ 
+
+    authProvider.logout();
+    otpProvider.logout();
+    print("Remove Token auth afterrrrrr : ${authProvider.state}");
+
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => SignInScreen(),
+        transitionDuration: Duration(seconds: 1), // Set transition duration to 1 second
+        reverseTransitionDuration: Duration(seconds: 1), // Set reverse transition duration to 1 second
+      ),
+    );
+
     print('Token removed from storage.');
   }
 }

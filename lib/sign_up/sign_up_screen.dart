@@ -47,16 +47,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Stack(
                   children: [
                     // Close icon in the top right corner
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.close), // You can customize the icon
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
                     Container(
                       height: 390,
                       child: Column(
@@ -70,17 +60,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(12),
-                            child: Flexible(
-                              child: Text(
-                                message,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'Cairo',
-                                ),
-                                textAlign: TextAlign.center,
+                            child: Text(
+                              message,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Cairo',
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                           DefaultButton(
@@ -137,6 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Future.delayed(Duration.zero, () {
         showErrorCustomDialog(context, messageFromApi);
       });
+      print("Error Message : $messageFromApi");
       otpProvider.setState(OtpState.initial);
       print("otp state : ${otpProvider.state}");
     }

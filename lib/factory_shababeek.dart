@@ -36,7 +36,7 @@ class FactoryShababeek extends StatefulWidget {
 
 class _FactoryShababeekState extends State<FactoryShababeek> {
   bool _locationServiceEnabled = false;
-  late String? token;
+  String? token;
    LoggedIn  is_logged_in = LoggedIn.initial;
   late AuthProvider authProvider;
   late AdsProvider adsProvider;
@@ -73,26 +73,6 @@ class _FactoryShababeekState extends State<FactoryShababeek> {
     setState(() {
       _locationServiceEnabled = serviceEnabled;
     });
-
-    // // If not enabled, request location service
-    // if (!serviceEnabled) {
-    //   serviceEnabled = await Geolocator.openLocationSettings();
-    // }
-
-    // Check location permission
-    // permission = await Geolocator.checkPermission();
-    // if (permission == LocationPermission.denied) {
-    //   permission = await Geolocator.requestPermission();
-    //   if (permission == LocationPermission.denied) {
-    //     // Permissions are denied, show error message or handle it gracefully
-    //     return;
-    //   }
-    // }
-
-    // If everything is enabled and permission is granted
-    // if (serviceEnabled && permission == LocationPermission.whileInUse) {
-    //
-    // }
   }
 
   Future<void> showCustomDialog(BuildContext context) async {
@@ -108,16 +88,7 @@ class _FactoryShababeekState extends State<FactoryShababeek> {
             child: Stack(
               children: [
                 // Close icon in the top right corner
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: IconButton(
-                    icon: Icon(Icons.close), // You can customize the icon
-                    onPressed: () {
-                      // Navigator.pop(context); // Close the dialog
-                    },
-                  ),
-                ),
+
                 Container(
                   height: 390,
                   child: Column(
@@ -169,38 +140,11 @@ class _FactoryShababeekState extends State<FactoryShababeek> {
     );
   }
 
-  // getConnectivity() {
-  //   subscription = Connectivity().onConnectivityChanged.listen(
-  //     (ConnectivityResult result) async {
-  //       isDeviceConnected = await InternetConnectionChecker().hasConnection;
-  //       // Check if the device is connected
-  //       if (isDeviceConnected) {
-  //         setState(() => isAlertSet = false);
-  //       } else if (!isAlertSet) {
-  //         showCustomDialog(context);
-  //         setState(() => isAlertSet = true);
-  //       }
-  //     },
-  //   );
-  // }
-
-
- // checkConnectivity() async {
- //    ConnectivityResult result = await Connectivity().checkConnectivity();
- //    isDeviceConnected = await InternetConnectionChecker().hasConnection;
- //    if (!isDeviceConnected && isAlertSet == false) {
- //      showCustomDialog(context);
- //      setState(() => isAlertSet = true);
- //    }
- //  }
-
-  isLoggedin() {
+  isLoggedin() async{
     print("iam here bilal is logged in fun");
     SharedPreferences.getInstance().then((sharedPrefValue) {
-      setState(() {
-        is_logged_in = sharedPrefValue.getString('token')!= null?LoggedIn.yes:LoggedIn.no;
-        token = sharedPrefValue.getString('token');
-      });
+        is_logged_in =  sharedPrefValue.getString('token_user')== null? LoggedIn.no :LoggedIn.yes;
+        token = sharedPrefValue.getString('token_user');
     });
     print("isLoggedin function");
   }
@@ -208,7 +152,7 @@ class _FactoryShababeekState extends State<FactoryShababeek> {
 
   @override
   void initState() {
-    isLoggedin();
+    print("initial Factory");
     // checkConnectivity();
     checkLocationService();
     super.initState();
@@ -220,29 +164,38 @@ class _FactoryShababeekState extends State<FactoryShababeek> {
     adsProvider = Provider.of<AdsProvider>(context);
     latLonProvider = Provider.of<LatLonProvider>(context);
 
+    print('Auth state1 : ${authProvider.state}');
+    isLoggedin();
+    print('token in factory  : ${token}');
 
-    if(is_logged_in == LoggedIn.no) return SignInScreen();
-    print("After if in factory");
+    print("logied 1 $is_logged_in");
 
-    if (is_logged_in == LoggedIn.yes && authProvider.state != AuthState.loaded) {
+
+
+
+    if(is_logged_in == LoggedIn.no) {
+      print("After if in factory");
+      return SignInScreen();
+    }
+    if (is_logged_in == LoggedIn.yes && authProvider.state != AuthState.loaded && token != null ) {
       print("load user now....");
       authProvider.loadUser(token);
     }
-
     if (is_logged_in == LoggedIn.yes && adsProvider.state != AdsState.loaded) {
-      print("AdsState In gen_tokeen  : ${adsProvider.state}");
+      print("AdsState In gen_tokeen: ${adsProvider.state}");
       adsProvider.loadAdsImage();
     }
     if(is_logged_in == LoggedIn.yes && !_locationServiceEnabled) return  NoLocationScreen();
-    print("homeScreen");
 
-    if(is_logged_in == LoggedIn.yes ){
+    if(is_logged_in == LoggedIn.yes && authProvider.state == AuthState.loaded && token != null ){
+      print("helo in homeeee majeeddd");
+
       return HomeScreen();
     }
+    else{
+      return Center(child: CircularProgressIndicator(color: Colors.black38,));
+    }
 
-    print("logied $is_logged_in");
-    // circle
-    return Center(child: CircularProgressIndicator(color: Colors.red,));
 
   }
 }

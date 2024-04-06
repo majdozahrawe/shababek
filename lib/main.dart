@@ -38,6 +38,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
+
   // await FirebaseApi().;
   await Permission.notification.request();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -106,7 +107,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   String timestamp = dateTimeString;
 
   // Save the notification to local storage
-  _saveNotificationToLocal(
+ await _saveNotificationToLocal(
     message.notification?.title ?? '',
     message.notification?.body ?? '',
     timestamp,
@@ -158,9 +159,4 @@ class MyApp extends StatelessWidget {
   }
 
 
-  void removeToken() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.remove('token');
-    print('Token removed from storage.');
-  }
 }

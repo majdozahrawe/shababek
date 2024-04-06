@@ -58,6 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
     adsProvider = Provider.of<AdsProvider>(context);
     workerLocationProvider = Provider.of<WorkerLocationProvider>(context);
 
+    if (authProvider.state !=AuthState.loaded){
+      return SignInScreen();
+    }
+
     // SizeConfig().init(context);
     if(provider.state != GridScreenState.loaded ) {
       // authProvider.setState(AuthState.initial);
@@ -315,11 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void removeToken() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.remove('token');
-    print('Token removed from storage.');
-  }
+
 }
 
 _launchFacebook() async {

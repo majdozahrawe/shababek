@@ -9,13 +9,14 @@ class PhoneOtpModel {
   // String? otp_date;
   // String? phone;
 
-  var otp;
+  var id;
+
 
 
   PhoneOtpModel({
     // this.otp_date,
     // this.phone,
-    this.otp,
+    this.id,
 
   });
 
@@ -23,7 +24,8 @@ class PhoneOtpModel {
     return PhoneOtpModel(
       // otp_date: json['data']['otp_date'] ?? "",
       // phone: json['data']['phone'] ?? "",
-      otp: json['otp'] ?? 0,
+      id: json['user']['_id'] ?? 0,
+
     );
   }
 }

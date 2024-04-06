@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart';
@@ -30,16 +32,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
   //   });
   // }
 
+  Timer? _timer;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   loadNotifications();
+  //   _firebaseMessaging.getToken().then((token) {
+  //     print('Token: $token');
+  //   });
+  //   // Poll for changes in notifications every few seconds
+  //   _timer = Timer.periodic(Duration(seconds: 5), (Timer t) => loadNotifications());
+  // }
   @override
   void initState() {
     super.initState();
-    // Initialize Firebase Messaging
-    FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
-    _firebaseMessaging.getToken().then((token) {
-      print('Token: $token');
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Check if the message contains a data payload.
+      if (message.data.isNotEmpty) {
+        loadNotifications();
+      }
     });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      // Triggered when the app is opened from a notification.
+      loadNotifications();
+    });
+
+    FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+
     loadNotifications();
   }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Initialize Firebase Messaging
+  //   // FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+  //   _firebaseMessaging.getToken().then((token) {
+  //     print('Token: $token');
+  //   });
+  //   _timer = Timer.periodic(Duration(seconds: 5), (Timer t) => loadNotifications());
+  //
+  //   loadNotifications();
+  // }
   Future<void> _handleBackgroundMessage(RemoteMessage message) async {
     print('Handling background message: ${message.notification?.title}');
     // If the notification screen is currently open, force a refresh to display the new notification
@@ -90,10 +133,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: Color(0XFFF1F1F6),
-      // Color(0XFFF1F1F6),
+      backgroundColor: Color(0xFFF1F1F6),
       appBar: AppBar(
         title: Text(
           "الإشعارات",
@@ -110,75 +151,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
         elevation: 0.0,
         iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: notifications.length ==0?
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: 2.0),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _onNotificationScrollNotification,
-          child: RefreshIndicator(
-            onRefresh: _refreshNotifications,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(80.0),
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Image.network("https://res.cloudinary.com/dmrb3gva0/image/upload/v1711317657/no_notification_lspk4d.png",),
-                      ),
-                      SizedBox(height: 20,),
-
-                      Text(
-                        'لم تتلقى إشعارات حتى الآن',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color: Colors.black38,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+      body: NotificationListener<ScrollNotification>(
+        onNotification: _onNotificationScrollNotification,
+        child: RefreshIndicator(
+          onRefresh: _refreshNotifications,
+          child: notifications.isEmpty
+              ? SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Container(
+              height: MediaQuery.of(context).size.height,
+              child: Center(
+                child: Text(
+                  'لم تتلقى إشعارات حتى الآن',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    color: Colors.black38,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
-
                 ),
-              ],
+              ),
             ),
+          )
+              : ListView.builder(
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              return buildCustomCard(
+                notifications[index].title,
+                notifications[index].body,
+                notifications[index].time,
+                index,
+              );
+            },
           ),
         ),
-      )
-          :SizedBox(
-    width: double.infinity,
-    child: Padding(
-    padding:
-    EdgeInsets.symmetric(horizontal: 8),
-
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _onNotificationScrollNotification,
-          child: RefreshIndicator(
-            onRefresh: _refreshNotifications,
-            child: ListView.builder(
-              itemCount: notifications.length + 1,
-              itemBuilder: (context, index) {
-                if (index < notifications.length) {
-                  return buildCustomCard(
-                    notifications[index].title,
-                    notifications[index].body,
-                    notifications[index].time,
-                    index,
-                  );
-                } else {
-                  return _buildLoadMoreIndicator();
-                }
-              },
-            ),
-          ),
-        ),
-      ),
       ),
     );
   }
+
 
   Widget buildCustomCard(String title, String subtitle, String time, int index) {
     return LayoutBuilder(

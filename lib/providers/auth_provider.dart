@@ -24,6 +24,19 @@ class AuthProvider with ChangeNotifier {
       setState(AuthState.error);
     }
   }
+  delete(phone, password) async {
+    setState(AuthState.loading);
+    apiResult = await UsersAPI().delete(phone, password);
+
+    if (!apiResult.hasError) {
+      print("delete email is done in provider");
+      user = apiResult.data;
+      setState(AuthState.loaded);
+    } else {
+      errorMessage = apiResult.failure.message;
+      setState(AuthState.error);
+    }
+  }
 
   loadUser(token) async {
     if(state == AuthState.loaded) {
@@ -56,6 +69,7 @@ class AuthProvider with ChangeNotifier {
 
   logout (){
     setState(AuthState.initial);
+
   }
   setState(state) {
     this.state = state;
